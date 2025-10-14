@@ -1,8 +1,8 @@
-blueprint_name: hpc-slurm-ubuntu-multi
+blueprint_name: hpc-slurm
 
 vars:
   project_id: #YOUR PROJECT ID
-  deployment_name: hpc-slurm-ubuntu-multi
+  deployment_name: hpc-slurm
   region: us-central1
   zone: us-central1-a
   enable_cleanup_compute: true
@@ -10,17 +10,15 @@ vars:
 terraform_backend_defaults:
   type: gcs  
   configuration:
-    bucket: #YOUR BUCKET
+    bucket:  #YOUR BUCKET
     prefix: "gcluster/state" 
 
 deployment_groups:
-- group: network
+- group: primary
   modules:
   - id: network
     source: modules/network/vpc
 
-- group: nfs
-  modules:
   - id: nfsshare
     source: modules/file-system/filestore
     use: [network]
@@ -41,8 +39,6 @@ deployment_groups:
           #!/bin/sh
           chown -R slurm:slurm /nfsshare
 
-- group: slurm-partitions
-  modules:
   #********************************************************************************
   #*** C2-standard-4 -> 2 physical cores / 16 GB memory / ON-DEMAND ***************
   #********************************************************************************
@@ -130,8 +126,6 @@ deployment_groups:
       partition_name: compute
       is_default: true
 
-- group: slurm-controller
-  modules:
   - id: slurm_login
     source: community/modules/scheduler/schedmd-slurm-gcp-v6-login
     use: [network]
